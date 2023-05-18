@@ -3,45 +3,44 @@ const express = require("express");
 const { supabase } = require("./supabase");
 
 const feedOptions = {
-  title: "Mi Feed RSS",
-  description: "Este es un ejemplo de un feed RSS generado con Node.js",
-  feed_url: "https://mi-sitio.com/rss",
+  title: "DOXA RSS FEED",
+  description: "DOXA RSS FEED FOR SOCIAL NETWORK",
+  feed_url: "https://mi-sitio.com/feed.xml",
   site_url: "https://mi-sitio.com",
 };
 
-const feed = new RSS(feedOptions);
-
-feed.item({
-  title: "Título del artículo",
-  description: "Descripción del artículo",
-  url: "https://mi-sitio.com/articulo-1",
-  date: new Date(),
-});
 
 const app = express();
 
 const getBlogs = async () => {
-  const blogs = await supabase.from("blogs").select("*");
+  const blogs = await supabase
+  .from("blogs")
+  .select("*")
+  .order("created_at", { ascending: false })
+  .limit(1);
   return blogs.data;
 };
 
 app.get("/feed.xml", async (req, res) => {
-  // verificar la base de datos
-
-  // convertir los datos en un objeto compatible
-
-  // agregaros al rssOutput
+  
+  const feed = new RSS(feedOptions);
+  let currentItem = null;
 
   const response = await getBlogs();
 
   response.forEach((e) => {
-    feed.item({
+    currentItem = {
       title: e.title,
       description: e.description,
       url: e.url,
       date: new Date(),
-    });
+    };
+    return;
   });
+
+  if (currentItem) {
+    feed.item(currentItem);
+  }
 
   const rssOutput = feed.xml({ indent: true });
 

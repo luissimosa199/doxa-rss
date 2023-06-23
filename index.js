@@ -13,17 +13,23 @@ const feedOptions = {
 const app = express();
 
 const getBlogs = async () => {
-  const blogs = await supabase
-  .from("blogs")
-  .select("*")
-  .order("created_at", { ascending: false })
-  .limit(1);
-  return blogs.data;
+  try {
+
+    const blogs = await supabase
+    .from("blogs")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1);
+    return blogs.data;
+  } catch(err) {
+    console.log(err)
+  }
 };
+
+const feed = new RSS(feedOptions);
 
 app.get("/feed.xml", async (req, res) => {
   
-  const feed = new RSS(feedOptions);
   let currentItem = null;
 
   const response = await getBlogs();
